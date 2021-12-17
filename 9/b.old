@@ -1,0 +1,121 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"sort"
+	"strconv"
+)
+
+type Point struct {
+  y, x int
+}
+
+func main() {
+  f, _ := os.Open("input_big.txt")
+  defer f.Close()
+  scanner := bufio.NewScanner(f)
+
+  input := make([]string, 0)
+  for scanner.Scan() {
+    input = append(input, scanner.Text())
+  }
+
+  basins := make([]int, 0)
+  for i := 0; i<len(input); i++ {
+    for j := 0; j<len(input[i]); j++ {
+      cur := input[i][j]
+      // up
+      if i > 0 {
+        comp := cur >= input[i-1][j]
+        if comp {
+          continue
+        }
+      }
+      // dahn
+      if i < len(input)-1 {
+        comp := cur >= input[i+1][j]
+        if comp {
+          continue
+        }
+      }
+      // left
+      if j > 0 {
+        comp := cur >= input[i][j-1]
+        if comp {
+          continue
+        }
+      }
+      // right
+      if j < len(input[i])-1 {
+        comp := cur >= input[i][j+1]
+        if comp {
+          continue
+        }
+      }
+      b := make([]Point, 0)
+      //visited := make(map[Point]bool, 0)
+      FindBasin(i, j, cur-1, input, &b)
+      basins = append(basins, len(b))
+    }
+  }
+  sort.Slice(basins, func (a, b int) bool { return basins[a] > basins[b] })
+  total := 1
+  for i := 0; i<3; i++ {
+    total *= basins[i]
+  }
+  fmt.Println(total)
+}
+
+func PointInBasin(point Point, b []Point) bool {
+  for _, p := range b {
+    if point == p {
+      return true
+    }
+  }
+  return false
+}
+
+// da pra receber tb um mapa de visitados em vez de iterar o slice toda vez
+// pessimo
+func FindBasin(i, j int, past byte, m []string, result *[]Point) {
+  cur := m[i][j]
+
+  if cur == '9' { return }
+
+  if int(cur) != int(past)+1 {
+    //fmt.Println("possible comp:", cur, past+1, i, j)
+    return
+  }
+
+
+  //fmt.Println("in basin:", int(cur), i, j)
+  //fmt.Println("comp:", cur, past+1, i, j)
+  p := Point{i, j}
+
+  if PointInBasin(p, *result) {
+    return
+  }
+
+  *result = append(*result, p)
+
+  if i > 0 {
+    FindBasin(i-1, j, cur, m, result)
+  }
+  if i < len(m)-1 {
+    FindBasin(i+1, j, cur, m, result)
+  }
+  if j > 0 {
+    FindBasin(i, j-1, cur, m, result)
+  }
+  if j < len(m[i])-1 {
+    FindBasin(i, j+1, cur, m, result)
+  }
+}
+
+func Convert(b byte) int {
+  res, _ := strconv.Atoi(string(b))
+  return res
+}
+

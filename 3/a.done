@@ -1,0 +1,54 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+  "strconv"
+	"os"
+)
+
+func main() {
+  file, _ := os.Open("input.txt")
+  defer file.Close()
+
+  scanner := bufio.NewScanner(file)
+
+  count := make([]map[rune]int, 12)
+
+//  for i := 0; i < len(count); i++ {
+//    count[i] = map[rune]int{'0': 0, '1': 0}
+//  }
+
+  input := make([]string, 0)
+  for scanner.Scan() {
+    s := scanner.Text()
+
+    for i, c := range s {
+      if count[i] == nil {
+        count[i] = map[rune]int{}
+      }
+      count[i][c]++
+    }
+
+    input = append(input, s)
+  }
+
+  gamma := "0b"
+  ep := "0b"
+  for i := 0; i < len(count); i++ {
+    if count[i]['0'] > count[i]['1'] {
+      gamma += "0"
+      ep += "1"
+    } else {
+      gamma += "1"
+      ep += "0"
+    }
+  }
+
+  binary_gamma, _ := strconv.ParseInt(gamma, 0, len(gamma))
+  binary_ep, _ := strconv.ParseInt(ep, 0, len(ep))
+
+  fmt.Println(binary_gamma * binary_ep)
+
+}
+

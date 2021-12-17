@@ -1,0 +1,59 @@
+package main
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
+)
+
+func main() {
+  f, _ := os.Open("input.txt")
+  scanner := bufio.NewScanner(f)
+  defer f.Close()
+
+  input := make([][]int, 0)
+  for scanner.Scan() {
+    parsed := make([]int, 0)
+    numbers := strings.Split(scanner.Text(), "")
+    for _, n := range numbers {
+      converted, _ := strconv.Atoi(n)
+      parsed = append(parsed, converted)
+    }
+    input = append(input, parsed)
+  }
+
+  sum := 0
+  dirs := [4][2]int{{-1,0},{1,0},{0,-1},{0,1}}
+  height := len(input)
+  width := len(input[0])
+
+  for i := 0; i < height; i++ {
+    for j := 0; j < width; j++ {
+      lowest := true
+      cur := input[i][j]
+      for _, d := range dirs {
+        dh := i + d[0]
+        dw := j + d[1]
+
+
+        if dh < 0 || dh > height-1 || dw < 0 || dw > width-1 {
+          //fmt.Println(dh, dw)
+          continue
+        }
+        lowest = lowest && cur < input[dh][dw]
+      }
+      if lowest {
+        sum += cur+1
+      }
+    }
+  }
+
+  fmt.Println(sum)
+}
+
+func InBounds(i, j int, m [][]int) bool {
+  return i >= 0 && i <= len(m) && j >= 0 && j <= len(m[i])
+}
+
